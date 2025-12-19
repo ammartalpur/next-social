@@ -1,15 +1,26 @@
+"use client"
 import React from 'react'
-import FriendRequest from './FriendRequest'
-import Birthdays from './Birthdays';
-import Ad from './Ad';
-import Birthdays from './Birthdays';
+import FriendRequest from './MainMenu/FriendRequest'
+import Birthdays from './MainMenu/Birthdays';
+import Ad from './MainMenu/Ad';
+import UserInfoCard from './Profile/UserInfoCard';
+import UserMediaCard from './Profile/UserMediaCard';
 
-const RightMenu = ({userId}:{userId?:string}) => {
+const RightMenu = ({ userId }: { userId?: string }) => {
+
+  
   return (
     <div className="flex flex-col gap-6">
+      {userId ? (
+        <>
+          <UserInfoCard userId={userId} />
+          <UserMediaCard userId={userId} />
+        </>
+      ) : null}
+
       <FriendRequest />
       <Birthdays />
-      <Ad size='md'/>
+      <Ad size="md" />
     </div>
   );
 }

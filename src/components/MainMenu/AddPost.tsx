@@ -22,7 +22,7 @@ const AddPost = () => {
         <div id="textinput" className="flex flex-row gap-4 bg-white">
             <textarea id='posttest' 
             placeholder="whats on your mind?"
-            className="flex-1 bg-slate-100 rounded-lg p-2 resize-none"
+            className="flex-1 bg-slate-100 rounded-lg p-2 resize-none mt-2 ml-1"
             ></textarea>
 
           <Image
