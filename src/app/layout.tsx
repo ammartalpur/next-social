@@ -18,7 +18,6 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-
     <html lang="en">
       <body className={inter.className}>
         <div className="w-full bg-white px-4 md:px-8 lg:px-16 xl:px-32 ">

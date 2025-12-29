@@ -1,7 +1,12 @@
+'use client'
+
 import Image from 'next/image'
 import React from 'react'
 
 const AddPost = () => {
+
+
+
   return (
     <div className="flex bg-white">
       <div
@@ -19,10 +24,13 @@ const AddPost = () => {
         />
       </div>
       <div id="post" className="flex-1 ">
-        <div id="textinput" className="flex flex-row gap-4 bg-white">
+        <form id="textinput" className="flex flex-row gap-4 bg-white" >
             <textarea id='posttest' 
             placeholder="whats on your mind?"
             className="flex-1 bg-slate-100 rounded-lg p-2 resize-none mt-2 ml-1"
+            name='desc'
+            
+            required
             ></textarea>
 
           <Image
@@ -32,7 +40,8 @@ const AddPost = () => {
             height={20}
             className="w-5 h-5 cursor-pointer self-end"
           />
-        </div>
+          <button type="submit" >Submit</button>
+        </form>
         <div
           id="postoptions"
           className="flex bg-white items-center gap-4 mt-4 text-gray-500 flex-wrap"
