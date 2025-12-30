@@ -142,10 +142,10 @@ const ProfilePage = (): React.ReactNode => {
       </div>
       <div className="hidden lg:block w-[30%]">
         <RightMenu userId={currentUser?.id} />
-        
+
       </div>
     </div>
   );
 }
-
+// 2:55:18
 export default ProfilePage
