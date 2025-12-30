@@ -1,7 +1,7 @@
 'use client'
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { useAuth, useUser } from '@clerk/nextjs';
+import { useUser } from '@clerk/nextjs';
 
 import { getUserById } from '@/app/actions/User';
 
@@ -9,17 +9,7 @@ import { getUserById } from '@/app/actions/User';
 const ProfileCard = () => {
  
  const { user, isLoaded } = useUser();
-type UserData = {
-  _count: { follower: number };
-  name: string | null;
-  id: string;
-  username: string;
-  avatar: string | null;
-  cover: string | null;
-  surname: string | null;
-  description: string | null;
-  createdAt: Date;
-};
+
 
   
   const [userData, setUserData] = useState<UserData | null>(null);
@@ -57,7 +47,7 @@ type UserData = {
         <span className="font-semibold">{(userData?.name && userData?.surname) ? userData?.name + " " + userData?.surname : userData?.username }</span>
         <div className="flex items-center gap-4">
           <span className="text-xs text-gray-500">
-            {userData?._count.follower} followers
+            {userData?._count?.follower || 0} followers
           </span>
         </div>
         <button className="bg-blue-500 text-white text-xs p-2 rounded-md">

@@ -6,15 +6,17 @@ import Ad from './MainMenu/Ad';
 import UserInfoCard from './Profile/UserInfoCard';
 import UserMediaCard from './Profile/UserMediaCard';
 
-const RightMenu = ({ userId }: { userId?: string }) => {
+
+
+const RightMenu = ({userData}:{userData:UserData | null}) => {
 
   
   return (
     <div className="flex flex-col gap-6">
-      {userId ? (
+      {userData ? (
         <>
-          <UserInfoCard userId={userId} />
-          <UserMediaCard userId={userId} />
+          <UserInfoCard userData={userData} />
+          <UserMediaCard userData={userData} />
         </>
       ) : null}
 

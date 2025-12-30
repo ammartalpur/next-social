@@ -2,7 +2,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react'
 
-const UserMediaCard = ({userId}:{userId:string}) => {
+
+const UserMediaCard = ({ userData }: { userData: UserData }) => {
   return (
     <div className="p-4 bg-white rounded-lg shadow-md text-sm flex flex-col gap-4">
       <div id="top" className="flex justify-between items-center font-medium">
@@ -75,6 +76,6 @@ const UserMediaCard = ({userId}:{userId:string}) => {
       </div>
     </div>
   );
-}
+};
 
 export default UserMediaCard

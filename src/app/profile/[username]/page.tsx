@@ -1,8 +1,6 @@
 "use client"
 import LeftMenu from '@/components/LeftMenu';
-import AddPost from '@/components/MainMenu/AddPost';
 import Feed from '@/components/MainMenu/Feed';
-import Stories from '@/components/MainMenu/Stories';
 import RightMenu from '@/components/RightMenu';
 import React, { useEffect, useState } from 'react'
 import { useParams , notFound as nof} from 'next/navigation';
@@ -10,19 +8,8 @@ import Image from 'next/image';
 import { getUserByUsername } from '@/app/actions/User';
 import { useUser } from '@clerk/nextjs';
 import { getBlockedUserById } from '@/app/actions/Block';
-import { currentUser } from '@clerk/nextjs/server';
+import Loading from '@/components/Loading';
 
-  type UserData = {
-    name: string | null;
-    id: string;
-    username: string;
-    avatar: string | null;
-    cover: string | null;
-    surname: string | null;
-    description: string | null;
-    createdAt: Date;
-    _count?: { follower?: number , following?: number, posts?: number };
-  };
 
 const ProfilePage = (): React.ReactNode => {
 
@@ -84,7 +71,7 @@ const ProfilePage = (): React.ReactNode => {
    fetchUserData();
  }, [username]);
 
- if (loading) return <p>Loading...</p>;
+ if (loading) return <Loading />;
  if (notFound || isBlocked) return nof();
 
   return (
@@ -141,8 +128,9 @@ const ProfilePage = (): React.ReactNode => {
         </div>
       </div>
       <div className="hidden lg:block w-[30%]">
-        <RightMenu userId={currentUser?.id} />
+  
 
+        {!userData ? <p>Loading</p> : <RightMenu userData={userData} />}
       </div>
     </div>
   );
