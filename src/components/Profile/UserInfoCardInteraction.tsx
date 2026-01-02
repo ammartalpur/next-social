@@ -1,5 +1,7 @@
+"use client";
+
 import { SwitchBlock, SwitchFollower} from '@/app/actions/UserAction';
-import React, {  useOptimistic, useState } from 'react'
+import React, {  useEffect, useOptimistic, useState } from 'react'
 
 const UserInfoCardInteraction = ({
   userId,
@@ -20,20 +22,36 @@ const UserInfoCardInteraction = ({
     followingRequestSent: isFollowingSent 
   })
 
+  useEffect(() => {
+    setUserState({
+      following: isFollowing,
+      blocked: isUserBlocked,
+      followingRequestSent: isFollowingSent,
+    });
+  }, [isFollowing, isFollowingSent, isUserBlocked]);
+
+  const nextFollowState = (state: typeof userState) => {
+    if (state.following) {
+      return { ...state, following: false };
+    }
+
+    if (state.followingRequestSent) {
+      return { ...state, followingRequestSent: false };
+    }
+
+    return { ...state, followingRequestSent: true };
+  };
+
   const follow = async () => {
     switchOptimisticState("follow");
     try {
-      
-     {currentUserId && (await SwitchFollower(userId, currentUserId));}
-     
-     setUserState(prev => ({
-       ...prev,
-       following: prev.following && false,
-       followingRequestSent: !prev.following && !prev.followingRequestSent ? true : false
-     }))
-   } catch (error) {
-    
-   }
+      if (currentUserId) {
+        await SwitchFollower(userId, currentUserId);
+      }
+      setUserState(prev => nextFollowState(prev));
+    } catch (error) {
+      console.error("Follow error", error);
+    }
   } 
 
   const block = async () => {
@@ -44,19 +62,13 @@ const UserInfoCardInteraction = ({
         ...prev,blocked: !prev.blocked
       }))
     } catch (error) {
-      
+      console.error("Block error", error);
     }
   }
   
   const [OptimisticState, switchOptimisticState] = useOptimistic(
     userState,
-    (state , value: "follow" | "block") =>value ==="follow" ? {
-      ...state,
-      following: state.following && false,
-      followingRequestSent:
-        !state.following && !state.followingRequestSent ? true : false,
-    } : {...state , blocked: !state.blocked}
-  
+    (state , value: "follow" | "block") => value ==="follow" ? nextFollowState(state) : {...state , blocked: !state.blocked}
   );
   return (
     <>

@@ -1,8 +1,8 @@
 import { useUser } from '@clerk/nextjs'
 import Image from 'next/image'
 import Link from 'next/link'
-import React, { useEffect, useState } from 'react'
-import { getUserFriendRequest } from "@/app/actions/UserAction";
+import React, { useEffect, useOptimistic, useState } from 'react'
+import { acceptFollowRequest, declineFollowRequest, getUserFriendRequest } from "@/app/actions/UserAction";
 import { FollowRequest, User } from '@prisma/client';
 
 type TypeFriendRequest = FollowRequest & {
@@ -10,8 +10,10 @@ type TypeFriendRequest = FollowRequest & {
 }
 
 const FriendRequest = () => {
+  
   const { user, isLoaded } = useUser();
   const [UserFriendReq, setUserFriendReq] = useState<TypeFriendRequest[]>([]);
+  const [optimisticRequests, setOptimisticRequests] = useOptimistic<TypeFriendRequest[]>(UserFriendReq);
   
   useEffect(() => {
     const fetchFriendRequests = async () => {
@@ -23,6 +25,37 @@ const FriendRequest = () => {
     fetchFriendRequests();
     
   }, [user?.id])
+
+  const accept = async (request: TypeFriendRequest) => {
+    if (!user?.id || !isLoaded) return;
+    setOptimisticRequests((prev) => prev.filter((r) => r.id !== request.id));
+    setUserFriendReq((prev) => prev.filter((r) => r.id !== request.id));
+    try {
+      await acceptFollowRequest(request.senderId.toString(), user.id);
+    } catch (error) {
+      setUserFriendReq((prev) => {
+        const exists = prev.some((r) => r.id === request.id);
+        return exists ? prev : [request, ...prev];
+      });
+    }
+  }
+
+  const decline = async (request: TypeFriendRequest) => {
+    if (!user?.id || !isLoaded) return;
+    setOptimisticRequests((prev) => prev.filter((r) => r.id !== request.id));
+    setUserFriendReq((prev) => prev.filter((r) => r.id !== request.id));
+    try {
+      await declineFollowRequest(request.senderId.toString(), user.id);
+    } catch (error) {
+      setUserFriendReq((prev) => {
+        const exists = prev.some((r) => r.id === request.id);
+        return exists ? prev : [request, ...prev];
+      });
+    }
+  }
+
+
+  
   return (
     <div className="p-4 bg-white rounded-lg shadow-md text-sm flex flex-col gap-4">
       <div id="top" className="flex justify-between items-center font-medium">
@@ -32,7 +65,7 @@ const FriendRequest = () => {
         </Link>
       </div>
 
-    {UserFriendReq.map(request => (
+    {optimisticRequests.map(request => (
       <div key={request.id} id="user" className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Image
@@ -51,6 +84,7 @@ const FriendRequest = () => {
             className="cursor-pointer"
             width={20}
             height={20}
+            onClick={() => accept(request)}
           />
           <Image
             src={"/reject.png"}
@@ -58,6 +92,7 @@ const FriendRequest = () => {
             className="cursor-pointer"
             width={20}
             height={20}
+            onClick={() => decline(request)}
           />
         </div>
       </div>

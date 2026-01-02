@@ -110,14 +110,14 @@ const ProfilePage = (): React.ReactNode => {
 
               <div className="flex flex-col items-center ">
                 <span className="font-medium ">
-                  {userData?._count?.follower}
+                  {userData?._count?.following}
                 </span>
                 <span className="text-sm ">Followers</span>
               </div>
 
               <div className="flex flex-col items-center ">
                 <span className="font-medium ">
-                  {userData?._count?.following}
+                  {userData?._count?.follower}
                 </span>
                 <span className="text-sm ">Following</span>
               </div>

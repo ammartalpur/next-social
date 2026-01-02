@@ -48,7 +48,7 @@ const ProfileCard = () => {
         <span className="font-semibold">{(userData?.name && userData?.surname) ? userData?.name + " " + userData?.surname : userData?.username }</span>
         <div className="flex items-center gap-4">
           <span className="text-xs text-gray-500">
-            {userData?._count?.follower || 0} followers
+            {userData?._count?.following || 0} followers
           </span>
         </div>
         <button className="bg-blue-500 text-white text-xs p-2 rounded-md">
