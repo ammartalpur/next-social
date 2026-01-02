@@ -5,9 +5,8 @@ import RightMenu from '@/components/RightMenu';
 import React, { useEffect, useState } from 'react'
 import { useParams , notFound as nof} from 'next/navigation';
 import Image from 'next/image';
-import { getUserByUsername } from '@/app/actions/User';
+import { getUserByUsername ,  getBlocked} from '@/app/actions/User';
 import { useUser } from '@clerk/nextjs';
-import { getBlockedUserById } from '@/app/actions/Block';
 import Loading from '@/components/Loading';
 
 
@@ -29,7 +28,7 @@ const ProfilePage = (): React.ReactNode => {
     const checkBlocked = async () => {
       if (currentUser?.id) {
         try {
-          const res = await getBlockedUserById(username, currentUser.id);
+          const res = await getBlocked(username, currentUser.id);
           setIsBlocked(!!res);
         } catch (err) {
           setIsBlocked(false);
@@ -73,7 +72,7 @@ const ProfilePage = (): React.ReactNode => {
 
  if (loading) return <Loading />;
  if (notFound || isBlocked) return nof();
-
+ console.log("proile wala" , userData?.avatar)
   return (
     <div className="flex gap-6 pt-6">
       <div className="hidden xl:block w-[20%]">
@@ -84,7 +83,7 @@ const ProfilePage = (): React.ReactNode => {
           <div className="flex flex-col items-center justify-center">
             <div className="w-full h-64 relative">
               <Image
-                src={userData?.cover || "/noCover.png"}
+                src={userData?.avatar || "/noCover.png"}
                 alt="banner"
                 fill
                 className="rounded-md object-cover"
@@ -128,8 +127,6 @@ const ProfilePage = (): React.ReactNode => {
         </div>
       </div>
       <div className="hidden lg:block w-[30%]">
-  
-
         {!userData ? <p>Loading</p> : <RightMenu userData={userData} />}
       </div>
     </div>

@@ -21,6 +21,7 @@ const ProfileCard = () => {
         setUserData(userdata);
       };
       fetchUserData();
+
     }
   }, [user?.id]);
 
@@ -30,7 +31,7 @@ const ProfileCard = () => {
     <div className="p-4 bg-white rounded-lg shadow-md text-sm flex flex-col gap-6 mb-2">
       <div className="h-20 relative">
         <Image
-          src={userData?.cover ? userData.cover : "/noAvatar.png"}
+          src={userData?.cover || "/noAvatar.png"}
           alt="Profile Cover"
           fill
           className="rounded-md object-cover"

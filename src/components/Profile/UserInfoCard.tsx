@@ -1,22 +1,67 @@
+import { followReqRes, followRes, getBlocked } from "@/app/actions/User";
+import { useUser } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import UserInfoCardInteraction from "./UserInfoCardInteraction";
+import UpdateUser from "./UpdateUser";
+import { currentUser } from "@clerk/nextjs/server";
 
 const UserInfoCard = ({ userData }: { userData: UserData }) => {
-  const createdDate = new Date(userData?.createdAt)
+  const [isUserBlocked, setIsUserBlocked] = useState(false);
+  const [isFollowing , setisFollowing] = useState(false);
+  const [isFollowingSent, setisFollowingSent] = useState(false);
+
+  const { user: currentUser, isLoaded } = useUser();
+
+  useEffect(() => {
+    const check = async () => {
+      if (isLoaded && currentUser?.id) {
+        const blockResponse = await getBlocked(currentUser.id, userData?.id);
+        if (blockResponse) {
+          setIsUserBlocked(true);
+        } else {
+          setIsUserBlocked(false);
+        }
+
+        const followResponse = await followRes(currentUser.id, userData?.id);
+        if (followResponse) {
+          setisFollowing(true);
+        } else {
+          setisFollowing(false);
+        }
+
+        const followReqResponse = await followReqRes(currentUser.id, userData?.id);
+        if (followReqResponse) {
+          setisFollowingSent(true);
+        } else {
+          setisFollowingSent(false);
+        }
+      }
+    };
+    check();
+
+    
+  }, [isLoaded, currentUser, userData?.id]);
+
+  const createdDate = new Date(userData?.createdAt);
   const formatedDate = createdDate.toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
     day: "numeric"
-  })
-  
+  });
+
   return (
     <div className="p-4 bg-white rounded-lg shadow-md text-sm flex flex-col gap-4">
       <div id="top" className="flex justify-between items-center font-medium">
         <span className="text-gray-500">User Media</span>
-        <Link href={"/"} className="text-blue-500 text-sm">
-          See All
-        </Link>
+        {currentUser?.id === userData?.id ? (
+          <UpdateUser />
+        ) : (
+          <Link href={"/"} className="text-blue-500 text-sm">
+            See All
+          </Link>
+        )}
       </div>
       <div id="bottom" className="flex flex-col gap-4 text-gray-500">
         <div className="flex items-center gap-2 ">
@@ -63,15 +108,18 @@ const UserInfoCard = ({ userData }: { userData: UserData }) => {
           )}
           <div className="flex gap-1 items-center">
             <Image src={"/date.png"} alt="link icon" width={16} height={16} />
-            <span>Joined { formatedDate}</span>
+            <span>Joined {formatedDate}</span>
           </div>
         </div>
-        <button className="bg-blue-500 text-white text-sm rounded-md p-2 ">
-          Follow
-        </button>
-        <span className="text-red-400 self-end text-xs cursor-pointer ">
-          Block User
-        </span>
+        {currentUser?.id && currentUser?.id != userData?.id && (
+          <UserInfoCardInteraction
+            userId={userData?.id}
+            currentUserId={currentUser?.id}
+            isFollowing={isFollowing}
+            isFollowingSent={isFollowingSent}
+            isUserBlocked={isUserBlocked}
+          />
+        )}
       </div>
     </div>
   );

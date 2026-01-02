@@ -11,17 +11,21 @@ export async function POST(req: NextRequest) {
     // For this guide, log payload to console
     const { id } = evt.data;
     const eventType = evt.type;
-   
+    console.log(evt.data)
     if (eventType === 'user.created') {
       try {
-        let baseUsername = evt.data.username || " ";
-        let username = baseUsername ;
+        console.log("[webhook] user.created received", { id: evt.data.id, username: evt.data.username });
+        const fallbackName = `${evt.data.first_name || ""}${evt.data.last_name || ""}`;
+        const baseUsername = evt.data.username || fallbackName;
+        const username = baseUsername;
+        console.log("[webhook] checking existing user", { username });
         let exists = await prisma.user.findUnique({ where: { username } });
        
         if (exists) {
           console.log("User already exists");
           return new Response("User already exists", { status: 200 });
         }
+        console.log("[webhook] creating user", { id: evt.data.id, username });
         await prisma.user.create({
           data: {
             id: evt.data.id,
@@ -30,7 +34,7 @@ export async function POST(req: NextRequest) {
             cover: "/noCover.png"
           }
         });
-        console.log("User created");
+        console.log("[webhook] user created", { username });
         return new Response("User created", { status: 200 });
       } catch (error) {
         console.error("DB error:", error);

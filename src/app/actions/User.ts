@@ -31,3 +31,28 @@ export async function getUserByUsername(username: string) {
     }
   });
 }
+
+
+export async function getBlocked(blockerId: string, blockedId: string) {
+  return prisma.block.findFirst({
+    where: { blockerId, blockedId },
+  });
+}
+
+
+export async function followRes(followerId: string, followingId: string) {
+  return prisma.follower.findFirst({
+    where: {
+      followerId , followingId
+    }
+  })
+}
+
+export async function followReqRes(senderId: string, receiverId: string) {
+  return prisma.followRequest.findFirst({
+    where: {
+      senderId,
+      receiverId,
+    },
+  });
+}

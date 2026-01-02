@@ -4,8 +4,13 @@ import Link from 'next/link'
 import React from 'react'
 import MobileMenu from './MobileMenu'
 import Image from 'next/image'
-import { ClerkLoaded } from '@clerk/nextjs';
-import { ClerkLoading, SignedIn, SignedOut, UserButton } from '@clerk/clerk-react';
+import {
+  ClerkLoaded,
+  ClerkLoading,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from "@clerk/nextjs";
 import Loading from './Loading'
 
 const Navbar = () => {

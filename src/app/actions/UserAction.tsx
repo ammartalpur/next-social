@@ -1,0 +1,180 @@
+"use server"
+
+import prisma from "@/lib/client";
+
+export const SwitchFollower = async (userId: string, currentUserId: string | undefined) => {
+
+  if (!currentUserId) {
+    throw new Error("You must be logged in to follow users");
+  }
+
+  // if (userId === currentUserId) {
+  //   throw new Error("You cannot follow yourself");
+  // }
+  
+  try {
+    const currentUser = await prisma.user.findFirst({
+      where: { id: currentUserId }
+    });
+    
+    if (!currentUser) {
+      throw new Error("Current user not found in database");
+    }
+
+    const userToFollow = await prisma.user.findFirst({
+      where: { id: userId },
+    });
+    if (!userToFollow) {
+      console.log("Current User:" , currentUserId)
+      throw new Error("User to follow not found in database");
+    }
+
+    const existingFollow = await prisma.follower.findFirst({
+      where: {
+        followerId: currentUserId,
+        followingId: userId,
+      },
+    });
+   
+    if (existingFollow) {
+      await prisma.follower.delete({
+        where: {
+          id: existingFollow.id
+        }
+      })
+    } else {
+      const existingFollowRequest = await prisma.followRequest.findFirst({
+        where: {
+          senderId: currentUserId,
+          receiverId: userId
+       }
+      })
+      
+      if (existingFollowRequest) {
+        await prisma.followRequest.delete({
+          where: {
+            id: existingFollowRequest.id,
+          }
+        })
+      } else {
+        await prisma.followRequest.create({
+          data: {
+            senderId: currentUserId,
+            receiverId: userId,
+          },
+        });
+      }
+    }
+  } catch (error) {
+    console.log("ERROR:", error);
+    throw new Error("Something Went Wrong");
+  }
+};
+
+export const SwitchBlock = async (userId: string, currentUserId: string | undefined) => {
+  console.log("UserId: " , userId)
+  console.log("CurrentUserId: ", currentUserId);
+
+  if (!currentUserId) {
+   throw new Error("You must be logged in to block users");
+  }
+
+  
+  try {
+    const currentUser = await prisma.user.findUnique({
+      where: { id: currentUserId }
+    });
+    
+    if (!currentUser) {
+      throw new Error("Current user not found in database");
+    }
+
+    const userToBlock = await prisma.user.findUnique({
+      where: { id: userId }
+    });
+    
+    if (!userToBlock) {
+      throw new Error("User to block not found in database");
+    }
+
+    const existingBlock = await prisma.block.findFirst({
+      where: {
+        blockerId: currentUserId,
+        blockedId: userId
+      }
+    })
+
+    if (existingBlock) {
+      await prisma.block.delete({
+        where: {
+          id:existingBlock.id
+        }
+      })
+    } else {
+      await prisma.block.create({
+        data: {
+          blockedId: userId,
+          blockerId: currentUserId,
+        },
+      });
+    }
+  } catch (error) {
+    console.error("Error: " , error);
+    throw new Error("Something Went Wrong");
+  }
+}
+
+
+export const postWithMedia = async (userId: string) =>{
+  return await prisma.post.findMany({
+    where: {
+      userId,
+      img: {
+        not: null,
+      }
+    },
+    take: 8,
+    orderBy: {
+      createdAt:"desc"
+    }
+  })
+}
+
+export const getUserFriendRequest = async (userId: string) => {
+  if (!userId) return null;
+
+  return await prisma.followRequest.findMany({
+    where: {
+      receiverId: userId
+    },
+    include: {
+      sender: true
+    }
+  })
+}
+
+export const acceptFollowRequest = async (userId:string , currentUserId: string) => {
+  if (!currentUserId) {
+    throw new Error("User is not Authenticated!")
+  }
+  const existingFollowReq = await prisma.followRequest.findFirst({
+    where: {
+      senderId: userId,
+      receiverId: currentUserId
+    }
+  })
+  if (existingFollowReq) {
+    await prisma.followRequest.delete({
+      where: {
+        id: existingFollowReq.id,
+      }
+    })
+    await prisma.follower.create({
+      data: {
+        followerId: userId,
+        followingId: currentUserId
+      }
+    })
+  }
+
+}
