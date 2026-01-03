@@ -9,7 +9,7 @@ import { Suspense } from 'react'
 
 
 
-const RightMenu = ({userData}:{userData:UserData | null}) => {
+const RightMenu = ({userData, onRefresh}:{userData:UserData | null; onRefresh?: () => void}) => {
 
   
   return (
@@ -17,7 +17,7 @@ const RightMenu = ({userData}:{userData:UserData | null}) => {
       {userData ? (
         <>
           <Suspense fallback="loading...">
-            <UserInfoCard userData={userData} />
+            <UserInfoCard userData={userData} onUpdate={onRefresh} />
           </Suspense>
           <Suspense fallback="loading...">
             <UserMediaCard userData={userData} />

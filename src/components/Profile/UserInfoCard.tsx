@@ -7,7 +7,7 @@ import UserInfoCardInteraction from "./UserInfoCardInteraction";
 import UpdateUser from "./UpdateUser";
 import { currentUser } from "@clerk/nextjs/server";
 
-const UserInfoCard = ({ userData }: { userData: UserData }) => {
+const UserInfoCard = ({ userData, onUpdate }: { userData: UserData; onUpdate?: () => void }) => {
   const [isUserBlocked, setIsUserBlocked] = useState(false);
   const [isFollowing , setisFollowing] = useState(false);
   const [isFollowingSent, setisFollowingSent] = useState(false);
@@ -56,7 +56,7 @@ const UserInfoCard = ({ userData }: { userData: UserData }) => {
       <div id="top" className="flex justify-between items-center font-medium">
         <span className="text-gray-500">User Media</span>
         {currentUser?.id === userData?.id ? (
-          <UpdateUser />
+          <UpdateUser user={userData} onUpdate={onUpdate} />
         ) : (
           <Link href={"/"} className="text-blue-500 text-sm">
             See All
@@ -65,7 +65,7 @@ const UserInfoCard = ({ userData }: { userData: UserData }) => {
       </div>
       <div id="bottom" className="flex flex-col gap-4 text-gray-500">
         <div className="flex items-center gap-2 ">
-          <span className="text-xl text-black">{userData?.username}</span>
+          <span className="text-xl text-black">{`${userData?.name} ${userData?.surname}`}</span>
           <span className="text-sm">@{userData?.username.toLowerCase()}</span>
         </div>
         {userData?.description && <p>{userData?.description}</p>}

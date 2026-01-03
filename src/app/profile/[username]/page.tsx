@@ -47,28 +47,35 @@ const ProfilePage = (): React.ReactNode => {
    setLoading(true);
    setNotFound(false);
 
-   const fetchUserData = async () => {
-     try {
-       const userdata = await getUserByUsername(username);
-
-       if (userdata) {
-         setUserData(userdata);
-         setNotFound(false);
-       } else {
-         setUserData(null);
-         setNotFound(true); 
-       }
-     } catch (err) {
-       console.error(err);
-       setUserData(null);
-       setNotFound(true);
-     } finally {
-       setLoading(false);
-     }
-   };
-
    fetchUserData();
  }, [username]);
+
+ const fetchUserData = async () => {
+   if (!username) return;
+   
+   setLoading(true);
+   try {
+     const userdata = await getUserByUsername(username);
+
+     if (userdata) {
+       setUserData(userdata);
+       setNotFound(false);
+     } else {
+       setUserData(null);
+       setNotFound(true);
+     }
+   } catch (err) {
+     console.error(err);
+     setUserData(null);
+     setNotFound(true);
+   } finally {
+     setLoading(false);
+   }
+ };
+
+ const handleRefresh = () => {
+   fetchUserData();
+ };
 
  if (loading) return <Loading />;
  if (notFound || isBlocked) return nof();
@@ -83,7 +90,7 @@ const ProfilePage = (): React.ReactNode => {
           <div className="flex flex-col items-center justify-center">
             <div className="w-full h-64 relative">
               <Image
-                src={userData?.avatar || "/noCover.png"}
+                src={userData?.cover || "/noCover.png"}
                 alt="banner"
                 fill
                 className="rounded-md object-cover"
@@ -127,7 +134,7 @@ const ProfilePage = (): React.ReactNode => {
         </div>
       </div>
       <div className="hidden lg:block w-[30%]">
-        {!userData ? <p>Loading</p> : <RightMenu userData={userData} />}
+        {!userData ? <p>Loading</p> : <RightMenu userData={userData} onRefresh={handleRefresh} />}
       </div>
     </div>
   );
