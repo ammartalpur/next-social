@@ -1,5 +1,5 @@
 declare global {
-  interface UserData  {
+  interface UserData {
     id: string;
     username: string;
     avatar?: string | null;
@@ -25,5 +25,4 @@ declare global {
     _count?: { follower?: number; following?: number; posts?: number };
   };
 }
-
 export default global

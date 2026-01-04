@@ -108,3 +108,77 @@ export const updateProfile = async (
     return { success: false, error: true };
   }
 };
+
+
+export const fetchPost = async (userId?: string, username?: string) => {
+
+  if (username) {
+    const posts = await prisma.post.findMany({
+      where: {
+        user: {
+          username
+        }
+      },
+      include: {
+        user: true,
+        likes: {
+          select: {
+            userId: true
+          }
+        },
+        _count: {
+          select:{
+            comments: true,
+          }
+        }
+      },
+      orderBy: {
+        createdAt:"desc"
+      }
+    });
+    return posts;
+  }
+
+  if (!username && userId) {
+    const following = await prisma.follower.findMany({
+      where: {
+        followerId:userId
+      },
+      select: {
+        followingId:true
+      }
+    });
+    const followingId = following.map(f => f.followingId);
+
+    // Include own userId in the list
+    const userIds = [...followingId, userId];
+
+    const posts = await prisma.post.findMany({
+      where: {
+        userId: {
+          in: userIds,
+        },
+      },
+      include: {
+        user: true,
+        likes: {
+          select: {
+            userId: true,
+          },
+        },
+        _count: {
+          select: {
+            comments: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+    return posts;
+  }
+
+  // Optionally, handle the case where neither is provided
+  return [];
+}
