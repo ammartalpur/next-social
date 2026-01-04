@@ -1,16 +1,22 @@
 'use client'
-import { updateProfile } from '@/app/actions/User'
+import { updateProfile} from '@/app/actions/User'
 import { CldUploadWidget } from 'next-cloudinary'
 import Image from 'next/image'
-import React, { useState } from 'react'
+import React, { useActionState, useEffect, useState } from 'react'
+import UpdateButton from './UpdateButton'
 
 const UpdateUser = ({ user, onUpdate }: { user: UserData; onUpdate?: () => void }) => {
   const [Open, setOpen] = useState(false)
-  const [Cover, setCover] = useState<any>(false)
+  const [Cover, setCover] = useState<string>(user?.cover || "")
   
   const handleClose = () => {
     setOpen(false)
+     if (onUpdate) {
+       onUpdate();
+     }
   }
+
+  const [state,formAction]=useActionState(updateProfile,{success:false , error:false})
 
   return (
     <div>
@@ -24,17 +30,7 @@ const UpdateUser = ({ user, onUpdate }: { user: UserData; onUpdate?: () => void 
       {Open && (
         <div className="fixed inset-0 bg-black/65 z-50 flex items-center justify-center px-4">
           <form
-            onSubmit={async (e) => {
-              e.preventDefault();
-              const formData = new FormData(e.currentTarget);
-              // @ts-ignore
-              await updateProfile(formData, user?.id , Cover?.secure_url);
-              setOpen(false);
-              // Trigger refresh callback after successful update
-              if (onUpdate) {
-                onUpdate();
-              }
-            }}
+            action={formAction}
             className="
             bg-white w-full max-w-3xl
             max-h-[90vh] overflow-y-auto
@@ -42,6 +38,8 @@ const UpdateUser = ({ user, onUpdate }: { user: UserData; onUpdate?: () => void 
             p-6 md:p-8 relative
           "
           >
+            <input type="hidden" name="userId" value={user?.id} />
+            <input type="hidden" name="cover" value={Cover} />
             {/* Header */}
             <div className="flex items-start justify-between mb-4">
               <div>
@@ -59,7 +57,12 @@ const UpdateUser = ({ user, onUpdate }: { user: UserData; onUpdate?: () => void 
                 ×
               </button>
             </div>
-            <CldUploadWidget uploadPreset='social' onSuccess={value=>setCover(value.info)}>
+            <CldUploadWidget
+              uploadPreset="social"
+              onSuccess={(value) =>
+                setCover((value as any).info?.secure_url || "")
+              }
+            >
               {({ open }) => (
                 <button
                   type="button"
@@ -73,7 +76,7 @@ const UpdateUser = ({ user, onUpdate }: { user: UserData; onUpdate?: () => void 
                     Change cover
                   </span>
                   <Image
-                    src={Cover?.secure_url || user?.cover || "/noCover.png"}
+                    src={Cover || user?.cover || "/noCover.png"}
                     alt=""
                     width={64}
                     height={40}
@@ -82,8 +85,6 @@ const UpdateUser = ({ user, onUpdate }: { user: UserData; onUpdate?: () => void 
                 </button>
               )}
             </CldUploadWidget>
-            
-
             {/* Inputs */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
@@ -112,19 +113,14 @@ const UpdateUser = ({ user, onUpdate }: { user: UserData; onUpdate?: () => void 
                 </div>
               ))}
             </div>
-
+            {state.success && (
+              <p className="text-green-500">Profile has been updated!</p>
+            )}
+            {state.error && (
+              <p className="text-red-500 ">Something went wrong!</p>
+            )}
             {/* Button */}
-            <button
-              type="submit"
-              className="
-              mt-6 w-full
-              bg-blue-500 hover:bg-blue-600
-              text-white text-sm font-medium
-              py-2.5 rounded-md
-            "
-            >
-              Update
-            </button>
+            <UpdateButton />
           </form>
         </div>
       )}

@@ -59,16 +59,23 @@ export async function followReqRes(senderId: string, receiverId: string) {
 }
 
 
-export const updateProfile = async (formData: FormData , userId:string , cover:string) => {
-  if(!userId) {
-    return "err"
+export const updateProfile = async (
+  prevState: { success: boolean; error: boolean },
+  formData: FormData
+) => {
+  const userId = formData.get("userId")?.toString();
+  const cover = formData.get("cover")?.toString() || "";
+
+  if (!userId) {
+    return { success: false, error: true };
   }
 
-  const field = Object.fromEntries(formData)
+  const field = Object.fromEntries(formData);
   const filteredFields = Object.fromEntries(
-    Object.entries(field).filter(([_,value])=> value != "")
-  )
-
+    Object.entries(field).filter(
+      ([key, value]) => key !== "userId" && key !== "cover" && value !== ""
+    )
+  );
 
   const profile = z.object({
     cover: z.string().optional(),
@@ -85,17 +92,19 @@ export const updateProfile = async (formData: FormData , userId:string , cover:s
 
   if (!validatedFields.success) {
     console.log(validatedFields.error.flatten().fieldErrors);
-    return "err"
+    return { success: false, error: true };
   }
 
   try {
     await prisma.user.update({
       where: {
-        id:userId
+        id: userId,
       },
-      data: validatedFields.data
-    })
+      data: validatedFields.data,
+    });
+    return { success: true, error: false };
   } catch (error) {
-    console.log(error)
+    console.log(error);
+    return { success: false, error: true };
   }
-}
+};
