@@ -3,6 +3,9 @@
 import prisma from "@/lib/client";
 import { auth } from "@clerk/nextjs/server";
 import { User } from "@prisma/client";
+import { error } from "console";
+import { revalidatePath } from "next/cache";
+import z from "zod";
 
 export const SwitchFollower = async (userId: string, currentUserId: string | undefined) => {
 
@@ -268,4 +271,30 @@ export const addComment = async (postId: number, desc: string, userId: string) =
     console.log("Error: ", error);
     throw new Error("Something went wrong!");
   }
+}
+
+
+export const addPost = async (formData: FormData, img: string, userId:string) => {
+  const desc = formData.get("desc") as string;
+  const Desc = z.string().min(1).max(255)
+
+  const validatedDesc = Desc.safeParse(desc)
+  if (!validatedDesc.success) {
+    console.log("description is not valid");
+    return
+  }
+
+  try {
+    await prisma.post.create({
+      data: {
+        desc: validatedDesc.data,
+        userId,
+        img
+      }
+    })
+    revalidatePath('/')
+  } catch (error) {
+    console.log(error);
+  }
+
 }

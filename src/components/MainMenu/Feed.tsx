@@ -13,7 +13,8 @@ type PostType = PrismaPost & {
 };
 
 
-const Feed = ({ username }: { username?: string }) => {
+
+const Feed = ({ username, refresh }: { username?: string; refresh?: number }) => {
   const { user, isLoaded } = useUser();
   const [posts, setPosts] = useState<PostType[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,7 +34,7 @@ const Feed = ({ username }: { username?: string }) => {
     };
     getPosts();
     return () => { isMounted = false; };
-  }, [username, user?.id]);
+  }, [username, user?.id, refresh]);
 
   if (loading) return <div>Loading...</div>;
 
@@ -44,6 +45,6 @@ const Feed = ({ username }: { username?: string }) => {
         : "No post found"}
     </div>
   );
-}
+};
 
 export default Feed
