@@ -1,14 +1,16 @@
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-import prisma from "@/lib/client";
-import { verifyWebhook } from "@clerk/nextjs/webhooks";
+
 import { NextRequest } from "next/server";
+import prisma from "@/lib/client";
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
-    const evt = await verifyWebhook(req);
-
+    const { verifyWebhook } = await import("@clerk/nextjs/webhooks");
+    // Convert to NextRequest to satisfy verifyWebhook's type requirement
+    const nextReq = req instanceof NextRequest ? req : new NextRequest(req.url, req);
+    const evt = await verifyWebhook(nextReq);
     const eventType = evt.type;
 
     if (eventType === "user.created") {
@@ -21,20 +23,18 @@ export async function POST(req: NextRequest) {
         where: { username },
       });
 
-      if (exists) {
-        return new Response("User already exists", { status: 200 });
+      if (!exists) {
+        await prisma.user.create({
+          data: {
+            id: evt.data.id,
+            username,
+            avatar: evt.data.image_url || "/noAvatar.png",
+            cover: "/noCover.png",
+          },
+        });
       }
 
-      await prisma.user.create({
-        data: {
-          id: evt.data.id,
-          username,
-          avatar: evt.data.image_url || "/noAvatar.png",
-          cover: "/noCover.png",
-        },
-      });
-
-      return new Response("User created", { status: 200 });
+      return new Response("OK", { status: 200 });
     }
 
     if (eventType === "user.updated") {
@@ -43,18 +43,17 @@ export async function POST(req: NextRequest) {
         data: {
           username:
             evt.data.username ||
-            `${evt.data.first_name || ""}${evt.data.last_name || ""}` ||
-            "Nothing",
+            `${evt.data.first_name || ""}${evt.data.last_name || ""}`,
           avatar: evt.data.image_url || "/noAvatar.png",
         },
       });
 
-      return new Response("User updated", { status: 200 });
+      return new Response("OK", { status: 200 });
     }
 
-    return new Response("Webhook received", { status: 200 });
+    return new Response("Ignored", { status: 200 });
   } catch (err) {
     console.error("Webhook error:", err);
-    return new Response("Webhook error", { status: 400 });
+    return new Response("Bad Request", { status: 400 });
   }
 }
