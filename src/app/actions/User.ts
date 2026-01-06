@@ -1,7 +1,7 @@
 // src/app/actions/getUser.ts
 "use server";
 
-import prisma from "@/lib/client";
+import {prisma} from "@/lib/client";
 import z from "zod";
 
 export async function getUserById(userId: string) {
