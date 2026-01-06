@@ -231,3 +231,31 @@ export const switchLike = async (postId: number, userId: string) => {
     throw new Error("Something went wrong")
   }
 }
+
+export const getStories = async (userId:string) => {
+  if (!userId) return null;
+
+  return prisma.story.findMany({
+    where: {
+      expireAt: {
+        gt: new Date(),
+      },
+      OR: [
+        {
+          user: {
+            follower: {
+              some: {
+                followerId: userId
+              }
+            }
+          }
+        },
+        { userId }
+      ]
+    },
+    include: {
+      user: true
+    }
+  })
+}
+

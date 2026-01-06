@@ -240,6 +240,7 @@ export const declineFollowRequest = async (
 
 
 
+
 export const Comment = async (postId: number) => {
   return await prisma.comment.findMany({
     where: {
@@ -298,3 +299,41 @@ export const addPost = async (formData: FormData, img: string, userId:string) =>
   }
 
 }
+
+
+export const addStory = async (
+  img: string,
+  userId:string
+) => {
+  
+  try {
+    const existingStory = await prisma.story.findFirst({
+      where: {
+        userId
+      }
+    })
+
+    if (existingStory) {
+      await prisma.story.delete({
+        where: {
+          id:existingStory.id
+        }
+      })
+    }
+
+    const createdStory = await prisma.story.create({
+      data: {
+        userId,
+        img,
+        expireAt: new Date(Date.now()+24*60*60*1000),
+      },
+      include: {
+        user:true
+      }
+    });
+    return createdStory;
+
+  } catch (error) {
+    console.log(error);
+  }
+};

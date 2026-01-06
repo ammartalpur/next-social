@@ -3,7 +3,7 @@
 import { useUser } from "@clerk/nextjs";
 import { CldUploadWidget } from "next-cloudinary";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { use, useState } from "react";
 import AddPostButton from "./addPostButton";
 import { addPost } from "@/app/actions/UserAction";
 
@@ -17,7 +17,9 @@ const AddPost = ({ onPostAdded }: { onPostAdded?: () => void }) => {
   if (!isLoaded) {
     return "Loading...";
   }
-
+  if (!user) {
+    return null
+  }
   const handleSubmit = async (formData: FormData) => {
     setSubmitting(true);
     try {
