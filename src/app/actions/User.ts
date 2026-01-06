@@ -148,7 +148,7 @@ export const fetchPost = async (userId?: string, username?: string) => {
         followingId:true
       }
     });
-    const followingId = following.map(f => f.followingId);
+    const followingId = following.map((f: { followingId: string }) => f.followingId);
 
     // Include own userId in the list
     const userIds = [...followingId, userId];

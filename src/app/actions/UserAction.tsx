@@ -247,7 +247,7 @@ export const Comment = async (postId: number) => {
       postId
     },
     include: {
-      users: true
+      user: true
     }
   })
 }
@@ -259,12 +259,10 @@ export const addComment = async (postId: number, desc: string, userId: string) =
       data: {
         desc,
         postId,
-        users: {
-          connect: { id: userId },
-        },
+        userId,
       },
       include: {
-        users: true,
+        user: true,
       },
     });
     return createdComment;
