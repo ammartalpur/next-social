@@ -22,18 +22,18 @@
     "react": "19.0.0-rc-f994737d14-20240522",
     "react-dom": "19.0.0-rc-f994737d14-20240522",
     "svix": "^1.82.0",
-    "zod": "^4.3.4"
+    "zod": "^4.3.4",
+    "tailwindcss": "^3.4.19",
+  "postcss": "^8.4.30",
+  "autoprefixer": "^10.4.14"
   },
   "devDependencies": {
     "@types/node": "^20.19.27",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "autoprefixer": "^10.4.23",
     "eslint": "^8",
     "eslint-config-next": "^15.5.9",
-    "postcss": "^8.5.6",
     "prisma": "^7.2.0",
-    "tailwindcss": "^3.4.19",
     "typescript": "^5"
   }
 }
