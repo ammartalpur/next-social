@@ -130,7 +130,7 @@ const ProfilePage = (): React.ReactNode => {
               </div>
             </div>
           </div>
-          <Feed username={ userData?.username} />
+          <Feed username={userData?.username} />
         </div>
       </div>
       <div className="hidden lg:block w-[30%]">

@@ -179,6 +179,55 @@ export const fetchPost = async (userId?: string, username?: string) => {
     return posts;
   }
 
-  // Optionally, handle the case where neither is provided
-  return [];
+  // If neither username nor userId is provided, return all posts
+  const posts = await prisma.post.findMany({
+    include: {
+      user: true,
+      likes: {
+        select: {
+          userId: true,
+        },
+      },
+      _count: {
+        select: {
+          comments: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+  return posts;
+}
+
+export const switchLike = async (postId: number, userId: string) => {
+  if(!userId) throw new Error("User is not authenticated!")
+  
+  try {
+    const existingLikes = await prisma.like.findFirst({
+      where: {
+        postId,
+        userId
+      }
+    }) 
+
+    if (existingLikes) {
+      await prisma.like.delete({
+        where: {
+          id:existingLikes.id
+        }
+      })
+    } else {
+      await prisma.like.create({
+        data: {
+          postId,
+          userId,
+        }
+      })
+    }
+  } catch (error) {
+    console.error(error)
+    throw new Error("Something went wrong")
+  }
 }

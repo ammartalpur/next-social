@@ -1,6 +1,8 @@
 "use server"
 
 import prisma from "@/lib/client";
+import { auth } from "@clerk/nextjs/server";
+import { User } from "@prisma/client";
 
 export const SwitchFollower = async (userId: string, currentUserId: string | undefined) => {
 
@@ -232,3 +234,38 @@ export const declineFollowRequest = async (
     throw new Error("Something went wrong!");
   }
 };
+
+
+
+export const Comment = async (postId: number) => {
+  return await prisma.comment.findMany({
+    where: {
+      postId
+    },
+    include: {
+      users: true
+    }
+  })
+}
+
+export const addComment = async (postId: number, desc: string, userId: string) => {
+  if (!userId) throw new Error("User is not Authenticated!");
+  try {
+    const createdComment = await prisma.comment.create({
+      data: {
+        desc,
+        postId,
+        users: {
+          connect: { id: userId },
+        },
+      },
+      include: {
+        users: true,
+      },
+    });
+    return createdComment;
+  } catch (error) {
+    console.log("Error: ", error);
+    throw new Error("Something went wrong!");
+  }
+}
