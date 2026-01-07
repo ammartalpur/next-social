@@ -31,6 +31,8 @@ export async function POST(req: NextRequest) {
           data: {
             id: evt.data.id,
             username,
+            name: evt.data.first_name,
+            surname:evt.data.last_name,
             avatar: evt.data.image_url || "/noAvatar.png",
             cover: "/noCover.png"
           }

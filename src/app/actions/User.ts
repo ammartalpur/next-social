@@ -21,7 +21,12 @@ export async function getUserById(userId: string) {
 export async function getUserByUsername(username: string) {
   console.log("[getUserByUsername] Called with username:", username);
   const user = await prisma.user.findFirst({
-    where: { username: username },
+    where: { 
+      username: {
+        equals: username,
+        mode: 'insensitive'
+      }
+    },
     include: {
       _count: {
         select: {
