@@ -1,9 +1,9 @@
 import { useUser } from "@clerk/nextjs";
 import { Comment, User } from "@prisma/client";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
-type commentWithUser = Comment & { users: User[] };
+type commentWithUser = Comment & { user: User };
 
 const CommentList = ({
   comments,
@@ -16,6 +16,20 @@ const CommentList = ({
 }) => {
   const { user } = useUser();
   const [DescriptionState, setDescriptionState] = useState("");
+
+  // Debug: log incoming comments array whenever it changes
+  useEffect(() => {
+    console.log("[CommentList] Received comments:", comments);
+    if (Array.isArray(comments)) {
+      const withoutUser = comments.filter((c) => !c.user);
+      if (withoutUser.length) {
+        console.warn(
+          `[CommentList] ${withoutUser.length} comment(s) missing user relation:`,
+          withoutUser.map((c) => ({ id: c.id, userId: c.userId }))
+        );
+      }
+    }
+  }, [comments]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,46 +71,66 @@ const CommentList = ({
             </form>
           </div>
           <div id="comments" className="">
-            {comments.map((comment) => (
-              <div
-                id="comment"
-                className="flex gap-4 justify-between mt-6"
-                key={comment.id}
-              >
-                <Image
-                  src={comment.users && comment.users[0]?.avatar ? comment.users[0].avatar : "/noAvatar.png"}
-                  alt=""
-                  width={40}
-                  height={40}
-                  className="w-10 h-10 rounded-full"
-                />
-                <div id="description" className="flex flex-col gap-2 flex-1">
-                  <span className="font-medium">{comment.users && comment.users[0]?.username || "Unknown User"}</span>
-                  <p>{comment.desc}</p>
-                  <div className="flex items-center gap-8 text-sm text-gray-500 mt-2">
-                    <div className="flex items-center gap-4">
-                      <Image
-                        src={"/like.png"}
-                        alt=""
-                        width={12}
-                        height={12}
-                        className="cursor-pointer w-3 h-3"
-                      />
-                      <span className="text-gray-300">|</span>
-                      <span className="text-gray-500">123 Likes</span>
+            {comments.map((comment) => {
+              // Per-comment debug values
+              const avatar = comment.user?.avatar || "/noAvatar.png";
+              const username = comment.user?.username || "Unknown User";
+              if (!comment.user) {
+                console.warn("[CommentList] Missing user for comment:", {
+                  commentId: comment.id,
+                  userId: comment.userId,
+                });
+              } else {
+                if (!comment.user.avatar) {
+                  console.debug("[CommentList] User has no avatar, using default:", {
+                    commentId: comment.id,
+                    userId: comment.userId,
+                    username: comment.user.username,
+                  });
+                }
+              }
+
+              return (
+                <div
+                  id="comment"
+                  className="flex gap-4 justify-between mt-6"
+                  key={comment.id}
+                >
+                  <Image
+                    src={avatar}
+                    alt=""
+                    width={40}
+                    height={40}
+                    className="w-10 h-10 rounded-full"
+                  />
+                  <div id="description" className="flex flex-col gap-2 flex-1">
+                    <span className="font-medium">{username}</span>
+                    <p>{comment.desc}</p>
+                    <div className="flex items-center gap-8 text-sm text-gray-500 mt-2">
+                      <div className="flex items-center gap-4">
+                        <Image
+                          src={"/like.png"}
+                          alt=""
+                          width={12}
+                          height={12}
+                          className="cursor-pointer w-3 h-3"
+                        />
+                        <span className="text-gray-300">|</span>
+                        <span className="text-gray-500">123 Likes</span>
+                      </div>
+                      <div className="">Reply</div>
                     </div>
-                    <div className="">Reply</div>
                   </div>
+                  <Image
+                    src={"/more.png"}
+                    alt=""
+                    width={16}
+                    height={16}
+                    className="cursor-pointer w-4 h-4"
+                  />
                 </div>
-                <Image
-                  src={"/more.png"}
-                  alt=""
-                  width={16}
-                  height={16}
-                  className="cursor-pointer w-4 h-4"
-                />
-              </div>
-            ))}
+              );
+            })}
           </div>
         </>
       )}
