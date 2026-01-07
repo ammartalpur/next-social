@@ -1,6 +1,5 @@
+"use client"
 export const dynamic = "force-dynamic";
-
-("use client");
 import LeftMenu from "@/components/LeftMenu";
 import Feed from "@/components/MainMenu/Feed";
 import RightMenu from "@/components/RightMenu";
