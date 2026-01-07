@@ -19,7 +19,8 @@ export async function getUserById(userId: string) {
 
 
 export async function getUserByUsername(username: string) {
-  return prisma.user.findFirst({
+  console.log("[getUserByUsername] Called with username:", username);
+  const user = await prisma.user.findFirst({
     where: { username: username },
     include: {
       _count: {
@@ -31,6 +32,8 @@ export async function getUserByUsername(username: string) {
       }
     }
   });
+  console.log("[getUserByUsername] Result:", user);
+  return user;
 }
 
 

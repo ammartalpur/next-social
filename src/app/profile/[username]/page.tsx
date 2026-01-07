@@ -1,26 +1,24 @@
-"use client"
-import LeftMenu from '@/components/LeftMenu';
-import Feed from '@/components/MainMenu/Feed';
-import RightMenu from '@/components/RightMenu';
-import React, { useEffect, useState } from 'react'
-import { useParams , notFound as nof} from 'next/navigation';
-import Image from 'next/image';
-import { getUserByUsername ,  getBlocked} from '@/app/actions/User';
-import { useUser } from '@clerk/nextjs';
-import Loading from '@/components/Loading';
+export const dynamic = "force-dynamic";
 
+("use client");
+import LeftMenu from "@/components/LeftMenu";
+import Feed from "@/components/MainMenu/Feed";
+import RightMenu from "@/components/RightMenu";
+import React, { useEffect, useState } from "react";
+import { useParams, notFound as nof } from "next/navigation";
+import Image from "next/image";
+import { getUserByUsername, getBlocked } from "@/app/actions/User";
+import { useUser } from "@clerk/nextjs";
+import Loading from "@/components/Loading";
 
 const ProfilePage = (): React.ReactNode => {
-
-  const params = useParams()
+  const params = useParams();
   const username = params.username as string;
   const { user: currentUser, isLoaded: currentUserIsLoading } = useUser();
 
-
-
   const [userData, setUserData] = useState<UserData | null>(null);
-  const [loading , setLoading] = useState(true)
-  const [notFound, setNotFound] = useState(false)
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
   const [isBlocked, setIsBlocked] = useState<boolean>(false);
 
@@ -40,46 +38,47 @@ const ProfilePage = (): React.ReactNode => {
     checkBlocked();
   }, [currentUserIsLoading, currentUser?.id, username]);
 
+  useEffect(() => {
+    if (!username) return;
 
- useEffect(() => {
-   if (!username) return;
+    setLoading(true);
+    setNotFound(false);
 
-   setLoading(true);
-   setNotFound(false);
+    fetchUserData();
+  }, [username]);
 
-   fetchUserData();
- }, [username]);
+  const fetchUserData = async () => {
+    if (!username) return;
 
- const fetchUserData = async () => {
-   if (!username) return;
-   
-   setLoading(true);
-   try {
-     const userdata = await getUserByUsername(username);
+    setLoading(true);
+    console.log("[fetchUserData] Fetching user data for username:", username);
+    try {
+      const userdata = await getUserByUsername(username);
+      console.log("[fetchUserData] Received userdata:", userdata);
 
-     if (userdata) {
-       setUserData(userdata);
-       setNotFound(false);
-     } else {
-       setUserData(null);
-       setNotFound(true);
-     }
-   } catch (err) {
-     console.error(err);
-     setUserData(null);
-     setNotFound(true);
-   } finally {
-     setLoading(false);
-   }
- };
+      if (userdata) {
+        setUserData(userdata);
+        setNotFound(false);
+      } else {
+        setUserData(null);
+        setNotFound(true);
+      }
+    } catch (err) {
+      console.error("[fetchUserData] Error:", err);
+      setUserData(null);
+      setNotFound(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
- const handleRefresh = () => {
-   fetchUserData();
- };
+  const handleRefresh = () => {
+    fetchUserData();
+  };
 
- if (loading) return <Loading />;
- if (notFound || isBlocked) return nof();
- console.log("proile wala" , userData?.avatar)
+  if (loading) return <Loading />;
+  if (notFound || isBlocked) return nof();
+  console.log("proile wala", userData?.avatar);
   return (
     <div className="flex gap-6 pt-6">
       <div className="hidden xl:block w-[20%]">
@@ -134,10 +133,14 @@ const ProfilePage = (): React.ReactNode => {
         </div>
       </div>
       <div className="hidden lg:block w-[30%]">
-        {!userData ? <p>Loading</p> : <RightMenu userData={userData} onRefresh={handleRefresh} />}
+        {!userData ? (
+          <p>Loading</p>
+        ) : (
+          <RightMenu userData={userData} onRefresh={handleRefresh} />
+        )}
       </div>
     </div>
   );
-}
+};
 // 2:55:18
-export default ProfilePage
+export default ProfilePage;
